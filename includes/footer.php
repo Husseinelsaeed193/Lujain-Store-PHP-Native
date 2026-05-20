@@ -1,3 +1,9 @@
-<?php
+<footer class="bg-dark text-light text-center py-3 mt-5">
+    <div class="container">
+        <p class="mb-0">جميع الحقوق محفوظة © متجر لجين لعطور النيش والروائح الفاخرة 2026</p>
+    </div>
+</footer>
 
-// includes/footer.php
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
