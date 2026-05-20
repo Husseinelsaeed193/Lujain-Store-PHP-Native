@@ -1,41 +1,43 @@
 <?php
 // src/Classes/Users.php
 
-// 1. استدعاء ملف الكلاس الأب
-require_once __DIR__ . '/Model.php';
+class Users {
+    // تعريف الخصائص المحمية للكلاس لكي لا تظهر رسائل الـ Warning
+    protected $conn;
+    protected $table_name = "users";
 
-// 2. الكلاس الابن يرث من الكلاس الأب Model
-class Users extends Model {
-    
-    // 3. تحديد اسم الجدول الخاص بالمستخدمين
-    protected $table = 'users';
-
-    // 4. دالة تسجيل مستخدم (أو مدير) جديد
-    public function register($username, $email, $password, $role = 'customer') {
-        // تنظيف وحماية البيانات من ثغرات SQL Injection
-        $username = $this->db->real_escape_string($username);
-        $email    = $this->db->real_escape_string($email);
-        $role     = $this->db->real_escape_string($role);
-        
-        // تأمين وتشفيير كلمة المرور قبل حفظها في قاعدة البيانات
-        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-
-        // كتابة استعلام الإدخال
-        $sql = "INSERT INTO {$this->table} (username, email, password, role) 
-                VALUES ('$username', '$email', '$hashed_password', '$role')";
-        
-        // تنفيذ الاستعلام
-        return $this->db->query($sql);
+    // الباني (Constructor) لاستقبال كائن الاتصال بقاعدة البيانات
+    public function __construct($db) {
+        $this->conn = $db;
     }
 
-    // 5. دالة فحص البريد الإلكتروني لمنع التسجيل بنفس الحساب مرتين
-    public function emailExists($email) {
-        $email = $this->db->real_escape_string($email);
+    // دالة تسجيل الدخول والتحقق من الحساب
+    public function login($email, $password) {
+        // كتابة الاستعلام المتوافق مع mysqli باستخدام علامة الاستفهام لحماية البيانات
+        $query = "SELECT * FROM " . $this->table_name . " WHERE email = ? LIMIT 1";
         
-        $sql = "SELECT id FROM {$this->table} WHERE email = '$email'";
-        $result = $this->db->query($sql);
+        $stmt = $this->conn->prepare($query);
         
-        // إذا كان عدد الصفوف المسترجعة أكبر من 0، فهذا يعني أن الإيميل موجود ومسجل مسبقاً
-        return $result->num_rows > 0; 
+        if ($stmt) {
+            // ربط المتغير القادم من المستخدم (s تعني string)
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            
+            // جلب النتيجة
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows > 0) {
+                $user = $result->fetch_assoc();
+                
+                // التحقق من كلمة المرور (سواء كانت مشفرة بـ password_verify أو نص عادي حسب إعدادك الحالي)
+                // يفضل دائماً استخدام password_verify إن كانت مشفرة في قاعدة البيانات
+                if ($password === $user['password'] || password_verify($password, $user['password'])) {
+                    return $user; // إعادة بيانات المستخدم كاملة في حال نجاح المطابقة
+                }
+            }
+            $stmt->close();
+        }
+        
+        return false; // فشل تسجيل الدخول
     }
 }

@@ -33,16 +33,25 @@ include_once __DIR__ . '/includes/header.php';
             <?php foreach ($allProducts as $product): ?>
                 <div class="col">
                     <div class="card h-100 card-product border-0 shadow-sm">
-<img src="assets/images/<?php echo (!empty($product['image'])) ? $product['image'] : 'default_perfume.jpg'; ?>?v=<?php echo time(); ?>" class="card-img-top p-3" alt="<?php echo $product['name']; ?>" style="height: 250px; object-fit: contain;">                        <div class="card-body d-flex flex-column text-center">
-                            <h5 class="card-title fw-bold"><?php echo $product['name']; ?></h5>
-                            <p class="card-text text-muted flex-grow-1 text-truncate"><?php echo $product['description']; ?></p>
+                    <img src="assets/images/<?php echo $product['image']; ?>" class="card-img-top p-3" alt="<?php echo $product['name']; ?>" style="height: 250px; object-fit: contain;">
+                    <div class="card-body d-flex flex-column text-center">
+                             <h5 class="card-title fw-bold">
+                            <a href="product-details.php?id=<?php echo $product['id']; ?>" class="text-decoration-none text-dark hover-title">
+                           <?php echo $product['name']; ?>
+                              </a>
+                                </h5>    
+                                <p class="card-text text-muted flex-grow-1 text-truncate"><?php echo $product['description']; ?></p>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <span class="badge bg-secondary p-2"><?php echo $product['size']; ?> مل</span>
                                 <span class="text-danger fw-bold fs-5"><?php echo $product['price']; ?> ر.س</span>
                             </div>
                         </div>
                         <div class="card-footer bg-transparent border-0 pb-3">
-                            <button class="btn btn-dark w-100 py-2 fw-bold">إضافة للسلة 🛒</button>
+                            <form action="add-to-cart.php" method="POST" class="w-100">
+    <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+    <input type="hidden" name="quantity" value="1">
+    <button type="submit" class="btn btn-dark w-100 py-2 fw-bold">إضافة للسلة 🛒</button>
+</form>
                         </div>
                     </div>
                 </div>
